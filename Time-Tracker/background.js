@@ -33,9 +33,3 @@ chrome.tabs.onActivated.addListener((activeInfo) => {
 });
 
 //extra
-
-function convertTime(milliseconds) {
-	let minutes = Math.floor(milliseconds / 60000); // Get whole minutes
-	let seconds = Math.floor((milliseconds % 60000) / 1000); // Get remaining seconds
-	return `${minutes} minutes and ${seconds} seconds`; // Output: "2 minutes and 30 seconds"
-}
