@@ -1,0 +1,13 @@
+{
+	"manifest_version": 3,
+	"name": "Tab Tracker",
+	"version": "1.0",
+	"description": "Track active tab switches.",
+	"permissions": ["tabs", "storage"],
+	"background": {
+		"service_worker": "background.js"
+	},
+	"action": {
+		"default_popup": "popup.html"
+	}
+}
