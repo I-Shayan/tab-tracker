@@ -14,6 +14,7 @@ header {
 	margin-left: 70px;
 	font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande',
 		'Lucida Sans', Arial, sans-serif;
+	cursor: pointer;
 }
 .nameOfExt {
 	font-size: 30px;
@@ -53,4 +54,27 @@ li::first-letter {
 li {
 	list-style-type: disc;
 	line-height: 20px;
+}
+
+.dashboard-btn {
+	display: flex;
+	align-items: center;
+	background-color: rgb(212, 207, 207);
+	padding: 6px 12px;
+	border: none;
+	gap: 5px;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+.dashboard-btn:hover {
+	background-color: #e0e0e0;
+}
+
+.dashboard-link {
+	text-decoration: none;
+}
+i {
+	font-size: 15px;
+	margin-top: -4px;
 }

@@ -14,7 +14,6 @@ const resetBTN = document
 	});
 
 // Also reset in-memory object in background script
-
 function createItems() {
 	const div = document.getElementById('time_list');
 	div.innerHTML = ''; // Clear previous content

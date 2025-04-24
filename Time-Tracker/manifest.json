@@ -15,5 +15,11 @@
 	},
 	"icons": {
 		"16": "icon.png"
-	}
+	},
+	"web_accessible_resources": [
+		{
+			"resources": ["dashboard.html"],
+			"matches": ["<all_urls>"]
+		}
+	]
 }
