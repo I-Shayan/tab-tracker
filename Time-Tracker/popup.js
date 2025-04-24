@@ -1,35 +1,37 @@
-let ul = document.createElement('ul');
-ul.classList.add('times');
-const div = document.getElementById('time_list');
-
 chrome.storage.local.get(['timePerSite'], (result) => {
 	const savedData = result.timePerSite || {};
-	for (let data in savedData) {
-		const li = document.createElement('li');
-
-		const span = document.createElement('span');
-		span.classList.add('text');
-
-		// const img = document.createElement('img');
-		// img.classList.add('url-icons');
-
-		// img.src = getFaviconUrl(data);
-		// img.width = 16;
-		const timeConverted = convertTime(savedData[data]);
-		const urlClean = cleanLink(data);
-		span.textContent = `${urlClean} : ${timeConverted}`;
-		// li.appendChild(img);
-		li.appendChild(span);
-		ul.appendChild(li);
-	}
-	div.appendChild(ul);
-	// Now you can use savedData
+	createItems(savedData);
 });
+
+const resetBTN = document
+	.querySelector('.reset-btn')
+	.addEventListener('click', function () {
+		chrome.storage.local.clear(() => {
+			alert('Your data has been reset');
+		});
+	});
+
+function createItems() {
+	const div = document.getElementById('time_list');
+	div.innerHTML = ''; // Clear previous content
+
+	const ul = document.createElement('ul');
+	ul.classList.add('times');
+
+	const li = document.createElement('li');
+	const span = document.createElement('span');
+	liveTimer(span);
+	span.classList.add('text');
+
+	li.appendChild(span);
+	ul.appendChild(li);
+	div.appendChild(ul);
+}
 
 function convertTime(milliseconds) {
 	let minutes = Math.floor(milliseconds / 60000); // Get whole minutes
 	let seconds = Math.floor((milliseconds % 60000) / 1000); // Get remaining seconds
-	return `${minutes} minutes and ${seconds} seconds`; // Output: "2 minutes and 30 seconds"
+	return `${minutes} minutes and ${seconds} seconds`;
 }
 
 function getFaviconUrl(url) {
@@ -53,4 +55,29 @@ function cleanLink(url) {
 	url = url.replace(/\.(com|org)$/, '');
 
 	return url;
+}
+
+function liveTimer(span) {
+	let currentTab = '';
+	let timeElapsed = 0;
+	chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+		if (tabs[0]) {
+			const newTab = new URL(tabs[0].url).hostname;
+			// If the tab changed, reset timeElapsed to what's in storage
+			if (newTab !== currentTab) {
+				currentTab = newTab;
+				chrome.storage.local.get('timePerSite', (data) => {
+					const timePerSite = data.timePerSite || {};
+					timeElapsed = timePerSite[currentTab] || 0;
+					span.textContent = `${currentTab} : ${convertTime(timeElapsed)}`;
+				});
+			} else {
+				span.textContent = `${cleanLink(currentTab)} : ${convertTime(
+					timeElapsed
+				)}`;
+			}
+		}
+	});
+	//make a live timer that shows the time spent on the current website
+	//add a onfocus and a currentwindo
 }

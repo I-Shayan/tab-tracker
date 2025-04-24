@@ -1,35 +1,46 @@
+let currentTab = null;
 let startTime = null; // Track when the user starts on a tab
-let currentTab = null; // Track the domain of the current tab
 let timePerSite = {}; // Store time spent on each site
+let timerInterval = null; // Timer interval for counting elapsed time
+let windowActive = true;
+let userIsIdle = true;
 
+chrome.windows.onFocusChanged.addListener((windowID) => {
+	if (windowID === chrome.windows.WINDOW_ID_NONE) {
+		windowActive = false;
+		console.log('Timer is stopped, tab out of focus');
+	} else {
+		windowActive = true;
+	}
+});
+
+// chrome.idle.setDetectionInterval(120); //idle detection after 2 mins of no activity
+// chrome.idle.onStateChanged.addListener((state) => {
+// 	if (state === 'idle' || state === 'locked') {
+// 		userIsIdle = true;
+// 	} else {
+// 		userIsIdle = false;
+// 	}
+// });
+
+// Start tracking time when the user is on a site
 chrome.tabs.onActivated.addListener((activeInfo) => {
-	// When a tab is activated, record the current time
 	const tabID = activeInfo.tabId;
 
-	// If there's already a tab and time has been tracked, calculate the time spent
-	if (currentTab && startTime) {
+	if (currentTab && startTime && windowActive) {
 		const timeSpent = Date.now() - startTime;
-
-		// If the site already exists in the timePerSite object, add the time spent
 		if (!timePerSite[currentTab]) {
-			timePerSite[currentTab] = 0; // Initialize if not yet in the object
+			timePerSite[currentTab] = 0;
 		}
-
-		timePerSite[currentTab] += timeSpent; // Add the time spent on this site
-
+		timePerSite[currentTab] += timeSpent;
 		chrome.storage.local.set({ timePerSite: timePerSite });
-		console.log(timePerSite); // Debugging: show the time per site
 	}
-
-	// Now set the start time for the newly activated tab
-	startTime = Date.now();
 
 	// Get the URL of the newly activated tab
 	chrome.tabs.get(tabID, (tab) => {
-		// Get the domain (hostname) from the tab's URL
-		currentTab = new URL(tab.url).hostname; // For example, 'youtube.com'
-		console.log('Switching to: ', currentTab); // Debugging: show the new site
+		const newTab = new URL(tab.url).hostname;
+		currentTab = newTab;
+		startTime = Date.now(); // Reset start time for the new tab
+		// Start the timer for the new tab
 	});
 });
-
-//extra

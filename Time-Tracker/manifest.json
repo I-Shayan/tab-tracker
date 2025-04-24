@@ -3,7 +3,7 @@
 	"name": "Tab Tracker",
 	"version": "1.0",
 	"description": "Track active tab switches.",
-	"permissions": ["tabs", "storage"],
+	"permissions": ["idle", "tabs", "storage"],
 	"background": {
 		"service_worker": "background.js"
 	},
