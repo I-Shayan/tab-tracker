@@ -8,8 +8,12 @@ const resetBTN = document
 	.addEventListener('click', function () {
 		chrome.storage.local.clear(() => {
 			alert('Your data has been reset');
+			document.getElementById('time_list').innerHTML = '';
+			chrome.runtime.sendMessage({ action: 'resetMemory' });
 		});
 	});
+
+// Also reset in-memory object in background script
 
 function createItems() {
 	const div = document.getElementById('time_list');

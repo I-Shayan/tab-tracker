@@ -27,7 +27,7 @@ chrome.windows.onFocusChanged.addListener((windowID) => {
 chrome.tabs.onActivated.addListener((activeInfo) => {
 	const tabID = activeInfo.tabId;
 
-	if (currentTab && startTime && windowActive) {
+	if (currentTab && startTime) {
 		const timeSpent = Date.now() - startTime;
 		if (!timePerSite[currentTab]) {
 			timePerSite[currentTab] = 0;
@@ -43,4 +43,9 @@ chrome.tabs.onActivated.addListener((activeInfo) => {
 		startTime = Date.now(); // Reset start time for the new tab
 		// Start the timer for the new tab
 	});
+});
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+	if (message.action === 'resetMemory') {
+		timePerSite = {}; // clear in-memory object
+	}
 });
