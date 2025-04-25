@@ -19,13 +19,20 @@
 			<span class="nameOfExt">Tab Time</span>
 			<button class="reset-btn">Reset Data</button>
 		</header>
+
 		<div id="time_list"></div>
-		<a class="dashboard-link" href="dashboard.html" target="_blank">
-			<button class="dashboard-btn">
-				<i class="fa fa-home"></i>
-				Home
-			</button>
-		</a>
+		<div class="timer-container">
+			<h2>Manual Timer</h2>
+			<div id="timerDisplay">00:00:00</div>
+			<button id="startBtn">Start</button>
+			<button id="stopBtn">Stop</button>
+		</div>
+
+		<button class="dashboard-btn" id="openDashboard">
+			<i class="fa fa-home"></i>
+			Home
+		</button>
+
 		<script src="popup.js"></script>
 	</body>
 </html>

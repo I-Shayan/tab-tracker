@@ -49,3 +49,42 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		timePerSite = {}; // clear in-memory object
 	}
 });
+
+let elapsedTime = 0; // Time in seconds
+let timer = null; // This will hold the timer reference
+
+// Function to update elapsed time every second and store it in local storage
+function updateTimer() {
+	elapsedTime++; // Increment the time every second
+	chrome.storage.local.set({ elapsedTime }); // Store the updated time in local storage
+}
+
+// Listen for when the extension starts up
+chrome.runtime.onStartup.addListener(() => {
+	chrome.storage.local.get('elapsedTime', (result) => {
+		if (result.elapsedTime) {
+			elapsedTime = result.elapsedTime; // If there was a stored time, continue from there
+		}
+	});
+});
+
+// Start the timer
+chrome.runtime.onConnect.addListener((port) => {
+	port.onMessage.addListener((msg) => {
+		if (msg.action === 'startTimer') {
+			if (!timer) {
+				// Start updating the time every second
+				timer = setInterval(updateTimer, 1000);
+			}
+		} else if (msg.action === 'stopTimer') {
+			// Stop the timer
+			clearInterval(timer);
+			timer = null;
+		}
+	});
+});
+
+// Stop timer when the extension is uninstalled or stopped (cleanup)
+chrome.runtime.onSuspend.addListener(() => {
+	clearInterval(timer);
+});

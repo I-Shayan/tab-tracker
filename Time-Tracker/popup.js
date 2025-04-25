@@ -13,6 +13,11 @@ const resetBTN = document
 		});
 	});
 
+document.getElementById('openDashboard').addEventListener('click', () => {
+	const dashboardURL = chrome.runtime.getURL('dashboard.html');
+	chrome.tabs.create({ url: dashboardURL });
+});
+
 // Also reset in-memory object in background script
 function createItems() {
 	const div = document.getElementById('time_list');
@@ -84,3 +89,60 @@ function liveTimer(span) {
 	//make a live timer that shows the time spent on the current website
 	//add a onfocus and a currentwindo
 }
+
+let timerRunning = false;
+let updateTimerInterval = null; // Interval reference for checking time
+
+// Function to update the timer display
+function updateTimerDisplay(elapsedTime) {
+	// Convert seconds to HH:MM:SS format
+	const hours = Math.floor(elapsedTime / 3600)
+		.toString()
+		.padStart(2, '0');
+	const minutes = Math.floor((elapsedTime % 3600) / 60)
+		.toString()
+		.padStart(2, '0');
+	const seconds = (elapsedTime % 60).toString().padStart(2, '0');
+	document.getElementById(
+		'timerDisplay'
+	).textContent = `${hours}:${minutes}:${seconds}`;
+}
+
+// Start button event listener
+document.getElementById('startBtn').addEventListener('click', () => {
+	if (!timerRunning) {
+		// Send a message to start the timer in the background script
+		const port = chrome.runtime.connect();
+		port.postMessage({ action: 'startTimer' });
+		timerRunning = true;
+
+		// Periodically check for updated time from storage
+		updateTimerInterval = setInterval(() => {
+			chrome.storage.local.get('elapsedTime', (result) => {
+				if (result.elapsedTime !== undefined) {
+					updateTimerDisplay(result.elapsedTime);
+				}
+			});
+		}, 1000);
+	}
+});
+
+// Stop button event listener
+document.getElementById('stopBtn').addEventListener('click', () => {
+	if (timerRunning) {
+		// Stop the timer in the background
+		const port = chrome.runtime.connect();
+		port.postMessage({ action: 'stopTimer' });
+		timerRunning = false;
+
+		// Clear the timer update interval
+		clearInterval(updateTimerInterval);
+	}
+});
+
+// Display the current time when the popup opens (if time exists in storage)
+chrome.storage.local.get('elapsedTime', (result) => {
+	if (result.elapsedTime) {
+		updateTimerDisplay(result.elapsedTime);
+	}
+});
