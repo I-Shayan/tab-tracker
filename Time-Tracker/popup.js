@@ -42,26 +42,12 @@ function convertTime(milliseconds) {
 	return `${minutes} minutes and ${seconds} seconds`;
 }
 
-function getFaviconUrl(url) {
-	try {
-		if (!url.startsWith('http')) {
-			url = 'https://' + url;
-		}
-		const domain = new URL(url).hostname;
-		return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
-	} catch (e) {
-		console.warn('Invalid URL:', url);
-		return 'default-icon.png';
-	}
-}
-
 function cleanLink(url) {
 	// Remove 'www.' from the beginning if it exists
 	url = url.replace(/^www\./, '');
 
 	// Remove '.com' and '.org' from the end if they exist
 	url = url.replace(/\.(com|org)$/, '');
-
 	return url;
 }
 
@@ -86,8 +72,6 @@ function liveTimer(span) {
 			}
 		}
 	});
-	//make a live timer that shows the time spent on the current website
-	//add a onfocus and a currentwindo
 }
 
 let timerRunning = false;
@@ -127,6 +111,16 @@ document.getElementById('startBtn').addEventListener('click', () => {
 	}
 });
 
+// Display the current time when the popup opens (if time exists in storage)
+chrome.storage.local.get('elapsedTime', (result) => {
+	if (result.elapsedTime) {
+		updateTimerDisplay(result.elapsedTime);
+	}
+});
+
+//check if popup js is fetching from local stoargae constantly, and background is uploading to
+//local stoarge constantly
+
 // Stop button event listener
 document.getElementById('stopBtn').addEventListener('click', () => {
 	if (timerRunning) {
@@ -137,12 +131,5 @@ document.getElementById('stopBtn').addEventListener('click', () => {
 
 		// Clear the timer update interval
 		clearInterval(updateTimerInterval);
-	}
-});
-
-// Display the current time when the popup opens (if time exists in storage)
-chrome.storage.local.get('elapsedTime', (result) => {
-	if (result.elapsedTime) {
-		updateTimerDisplay(result.elapsedTime);
 	}
 });
