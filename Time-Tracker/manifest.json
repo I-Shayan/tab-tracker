@@ -2,24 +2,15 @@
 	"manifest_version": 3,
 	"name": "Tab Tracker",
 	"version": "1.0",
-	"description": "Track active tab switches.",
-	"permissions": ["idle", "tabs", "storage"],
+	"description": "Track time per site",
+	"permissions": ["tabs", "storage", "notifications", "idle"],
 	"background": {
 		"service_worker": "background.js"
 	},
 	"action": {
-		"default_popup": "popup.html",
-		"default_icon": {
-			"16": "icon.png"
-		}
+		"default_popup": "popup/popup.html"
 	},
-	"icons": {
-		"16": "icon.png"
-	},
-	"web_accessible_resources": [
-		{
-			"resources": ["dashboard.html"],
-			"matches": ["<all_urls>"]
-		}
-	]
+	"externally_connectable": {
+		"matches": ["https://YOUR-NETLIFY-URL.netlify.app/*"]
+	}
 }
