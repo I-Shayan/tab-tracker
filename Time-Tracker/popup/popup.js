@@ -149,13 +149,12 @@ document.addEventListener('DOMContentLoaded', () => {
 	const timerEl = document.getElementById('timer');
 	const btn = document.getElementById('openDashboard');
 
-	// 1) Figure out which site we’re on
+	// 1) Determine the current hostname
 	chrome.tabs.query({ active: true, lastFocusedWindow: true }, ([tab]) => {
-		const url = tab?.url || '';
-		const hostname = new URL(url).hostname;
+		const hostname = new URL(tab.url || '').hostname;
 		siteEl.textContent = hostname;
 
-		// 2) Every 500ms ask the background for the live total
+		// 2) Poll the background for the live total every 500ms
 		setInterval(() => {
 			chrome.runtime.sendMessage(
 				{ action: 'getLiveTotal', domain: hostname },

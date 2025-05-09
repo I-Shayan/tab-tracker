@@ -82,31 +82,35 @@
 // background.js
 
 // 1) Globals to track which domain we’re timing and when we started
+// background.js
+
+// 1. Globals to track the current domain and when we started timing it
 let currentDomain = null;
 let lastStart = Date.now();
 
-// 2) Helper: stop timing `domain`, compute delta, and save to chrome.storage
+// 2. Helper: commit the elapsed time for a domain into storage
 function commitTime(domain) {
-	if (!domain) return; // nothing to do if no domain
+	if (!domain) return;
 	const now = Date.now();
-	const delta = now - lastStart; // ms since we started timing
-	// read old total (default 0), add delta, write back
+	const delta = now - lastStart;
 	chrome.storage.local.get({ [domain]: 0 }, (result) => {
 		const newTotal = result[domain] + delta;
 		chrome.storage.local.set({ [domain]: newTotal });
 	});
 }
 
-// 3) When the user switches tabs → commit old, start new
+// 3. When the user switches to a different tab
 chrome.tabs.onActivated.addListener(({ tabId }) => {
 	commitTime(currentDomain);
 	chrome.tabs.get(tabId, (tab) => {
-		currentDomain = new URL(tab.url || '').hostname;
-		lastStart = Date.now();
+		if (tab.url) {
+			currentDomain = new URL(tab.url).hostname;
+			lastStart = Date.now();
+		}
 	});
 });
 
-// 4) When a tab’s URL changes (in‐tab navigation) → commit old, start new
+// 4. When a tab’s URL changes (in‐tab navigation)
 chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
 	if (changeInfo.url) {
 		commitTime(currentDomain);
@@ -115,14 +119,12 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
 	}
 });
 
-// 5) When the user goes idle or returns → pause/resume timing
+// 5. Pause when user goes idle; resume when they return
 chrome.idle.onStateChanged.addListener((state) => {
 	if (state !== 'active') {
-		// user away: commit and clear
 		commitTime(currentDomain);
 		currentDomain = null;
 	} else {
-		// user back: find the active tab and restart timing
 		chrome.tabs.query({ active: true, lastFocusedWindow: true }, ([tab]) => {
 			if (tab && tab.url) {
 				currentDomain = new URL(tab.url).hostname;
@@ -132,9 +134,9 @@ chrome.idle.onStateChanged.addListener((state) => {
 	}
 });
 
-// 6) Handle in-extension messaging for a live total
+// 6. In‐extension messaging: popup asks for live total
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-	if (msg.action === 'getLiveTotal') {
+	if (msg.action === 'getLiveTotal' && msg.domain) {
 		chrome.storage.local.get(msg.domain, (data) => {
 			const stored = data[msg.domain] || 0;
 			const delta = currentDomain === msg.domain ? Date.now() - lastStart : 0;
@@ -144,7 +146,15 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 	}
 });
 
-// 7) On service-worker startup, begin timing whatever tab is active now
+// 7. External messaging: hosted dashboard asks for full stats
+chrome.runtime.onMessageExternal.addListener((msg, sender, sendResponse) => {
+	if (msg.action === 'getStats') {
+		chrome.storage.local.get(null, sendResponse);
+		return true;
+	}
+});
+
+// 8. Bootstrap on load: start timing the currently active tab
 chrome.tabs.query({ active: true, lastFocusedWindow: true }, ([tab]) => {
 	if (tab && tab.url) {
 		currentDomain = new URL(tab.url).hostname;
