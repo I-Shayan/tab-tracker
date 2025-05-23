@@ -1,3 +1,5 @@
+//write chart component to be used in dashboard.jsx
+
 import React from 'react';
 import {
 	ResponsiveContainer,

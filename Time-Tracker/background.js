@@ -93,7 +93,20 @@ function commitTime(domain) {
 		const newTotal = result[domain] + delta;
 		chrome.storage.local.set({ [domain]: newTotal });
 	});
+
+	fetch('http://localhost:8888/.netlify/functions/saveData', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ domain, time: delta }),
+	})
+		.then((response) => {
+			if (!response.ok) throw new Error(`${response.status}`);
+			return response.json();
+		})
+		.then((json) => console.log('Server saved:', json))
+		.catch((err) => console.error('Error saving to server:', err));
 }
+
 //when user switches tab, stop timing prev site and start timing new site, get domain and
 // set current domain to new domain
 chrome.tabs.onActivated.addListener(({ tabId }) => {
