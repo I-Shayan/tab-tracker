@@ -168,20 +168,15 @@ document.addEventListener('DOMContentLoaded', () => {
 		}, 500);
 	});
 
-	// 	// 3) Open your deployed dashboard when the button is clicked
-	// 	btn.addEventListener('click', () => {
-	// 		chrome.tabs.create({ url: 'https://YOUR-NETLIFY-URL.netlify.app' });
-	// 	});
-});
-
-document.getElementById('openDashboard').addEventListener('click', () => {
-	chrome.tabs.create({
-		url: 'https://YOUR-NETLIFY-URL.netlify.app',
+	document.getElementById('openDashboard').addEventListener('click', () => {
+		chrome.tabs.create({
+			url: chrome.runtime.getURL('dashboard/index.html'),
+		});
 	});
-});
 
-document.querySelector('.reset-btn').addEventListener('click', function () {
-	chrome.storage.local.clear(() => {
-		alert('Your data has been reset');
+	document.querySelector('.reset-btn').addEventListener('click', function () {
+		chrome.storage.local.clear(() => {
+			alert('Your data has been reset');
+		});
 	});
 });

@@ -81,14 +81,10 @@
 
 // background.js
 
-// 1) Globals to track which domain we’re timing and when we started
-// background.js
-
-// 1. Globals to track the current domain and when we started timing it
 let currentDomain = null;
 let lastStart = Date.now();
 
-// 2. Helper: commit the elapsed time for a domain into storage
+//Calculate the time spent on the website and store it in local storage
 function commitTime(domain) {
 	if (!domain) return;
 	const now = Date.now();
@@ -98,8 +94,8 @@ function commitTime(domain) {
 		chrome.storage.local.set({ [domain]: newTotal });
 	});
 }
-
-// 3. When the user switches to a different tab
+//when user switches tab, stop timing prev site and start timing new site, get domain and
+// set current domain to new domain
 chrome.tabs.onActivated.addListener(({ tabId }) => {
 	commitTime(currentDomain);
 	chrome.tabs.get(tabId, (tab) => {
@@ -109,8 +105,8 @@ chrome.tabs.onActivated.addListener(({ tabId }) => {
 		}
 	});
 });
-
-// 4. When a tab’s URL changes (in‐tab navigation)
+//when user changes URL, stop timing prev one adn start timing new one and
+// change current domain to new domain
 chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
 	if (changeInfo.url) {
 		commitTime(currentDomain);
@@ -118,8 +114,8 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
 		lastStart = Date.now();
 	}
 });
-
-// 5. Pause when user goes idle; resume when they return
+//if user state is not active, stop timing and current domain = null
+//if not then resume tracking adn get the URL/lastwindow
 chrome.idle.onStateChanged.addListener((state) => {
 	if (state !== 'active') {
 		commitTime(currentDomain);
@@ -134,7 +130,7 @@ chrome.idle.onStateChanged.addListener((state) => {
 	}
 });
 
-// 6. In‐extension messaging: popup asks for live total
+//data req to get livetotal from popupJS
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 	if (msg.action === 'getLiveTotal' && msg.domain) {
 		chrome.storage.local.get(msg.domain, (data) => {
@@ -145,16 +141,16 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 		return true; // keep channel open for async sendResponse
 	}
 });
-
-// 7. External messaging: hosted dashboard asks for full stats
+//data req from external website (dashboard)
 chrome.runtime.onMessageExternal.addListener((msg, sender, sendResponse) => {
 	if (msg.action === 'getStats') {
-		chrome.storage.local.get(null, sendResponse);
+		chrome.storage.local.get(null, (allData) => {
+			sendResponse(allData);
+		});
 		return true;
 	}
 });
 
-// 8. Bootstrap on load: start timing the currently active tab
 chrome.tabs.query({ active: true, lastFocusedWindow: true }, ([tab]) => {
 	if (tab && tab.url) {
 		currentDomain = new URL(tab.url).hostname;

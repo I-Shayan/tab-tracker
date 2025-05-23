@@ -10,7 +10,8 @@
 	"action": {
 		"default_popup": "popup/popup.html"
 	},
-	"externally_connectable": {
-		"matches": ["https://YOUR-NETLIFY-URL.netlify.app/*"]
-	}
+	"host_permissions": [
+		"http://localhost:8888/*",
+		"https://YOUR_NETLIFY_SITE.netlify.app/*"
+	]
 }
