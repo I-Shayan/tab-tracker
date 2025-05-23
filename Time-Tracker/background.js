@@ -89,22 +89,28 @@ function commitTime(domain) {
 	if (!domain) return;
 	const now = Date.now();
 	const delta = now - lastStart;
+
+	// 1) update chrome.storage.local as before
 	chrome.storage.local.get({ [domain]: 0 }, (result) => {
 		const newTotal = result[domain] + delta;
 		chrome.storage.local.set({ [domain]: newTotal });
 	});
 
+	// 2) send to Netlify function
 	fetch('http://localhost:8888/.netlify/functions/saveData', {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ domain, time: delta }),
 	})
-		.then((response) => {
-			if (!response.ok) throw new Error(`${response.status}`);
-			return response.json();
+		.then((res) => {
+			if (!res.ok) throw new Error(`HTTP ${res.status}`);
+			return res.json();
 		})
-		.then((json) => console.log('Server saved:', json))
-		.catch((err) => console.error('Error saving to server:', err));
+		.then((json) => console.log('Extension: saved to server', json))
+		.catch((err) => console.error('Extension: save error', err));
+
+	// reset timer
+	lastStart = now;
 }
 
 //when user switches tab, stop timing prev site and start timing new site, get domain and
