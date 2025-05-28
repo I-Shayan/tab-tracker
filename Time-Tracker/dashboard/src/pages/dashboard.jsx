@@ -1,4 +1,6 @@
 import React, { useEffect } from 'react';
+import Navbar from '../components/navbar';
+import GetDataButton from '../components/getData';
 
 export default function Dashboard() {
 	useEffect(() => {
@@ -15,8 +17,10 @@ export default function Dashboard() {
 
 	return (
 		<div>
+			<Navbar />
 			<h1>Dashboard</h1>
 			<p>Open your DevTools console to see the data.</p>
+			<GetDataButton />
 		</div>
 	);
 }
